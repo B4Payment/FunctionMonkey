@@ -64,6 +64,14 @@ namespace FunctionMonkey.Abstractions.Builders
         void Functions(Action<IFunctionBuilder> functions);
 
         /// <summary>
+        /// Surfaces a builder that allows Swashbuckle to be configured. If this builder
+        /// is not used then no document is included.
+        /// </summary>
+        /// <param name="swashbuckle">Swashbuckle builder</param>
+        /// <returns>The function host builder to support a Fluent API</returns>
+        IFunctionHostBuilder Swashbuckle(Action<ISwashbuckleBuilder> swashbuckle);
+
+        /// <summary>
         /// Surfaces a builder that allows Open API to be configured. If this builder
         /// is not used then no document is included.
         /// </summary>

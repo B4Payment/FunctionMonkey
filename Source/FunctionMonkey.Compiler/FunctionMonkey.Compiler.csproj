@@ -174,6 +174,11 @@
     <None Remove="Templates\storagetable.outputparameter.csharp.handlebars" />
     <None Remove="Templates\swaggerui.csharp.handlebars" />
     <None Remove="Templates\swaggerui.json.handlebars" />
+    <None Remove="Templates\swashbuckleswagger.csharp.handlebars" />
+    <None Remove="Templates\swashbuckleswagger.json.handlebars" />
+    <None Remove="Templates\swashbuckleswaggerstartup.csharp.handlebars" />
+    <None Remove="Templates\swashbuckleswaggerui.csharp.handlebars" />
+    <None Remove="Templates\swashbuckleswaggerui.json.handlebars" />
     <None Remove="Templates\timer.csharp.handlebars" />
     <None Remove="Templates\timer.json.handlebars" />
   </ItemGroup>
@@ -328,6 +333,11 @@
     <EmbeddedResource Include="Templates\signalr.outputparameter.csharp.handlebars" />
     <EmbeddedResource Include="Templates\storagetable.outputparameter.csharp.handlebars" />
     <EmbeddedResource Include="Templates\storagequeue.outputparameter.csharp.handlebars" />
+    <EmbeddedResource Include="Templates\swashbuckleswaggerstartup.csharp.handlebars" />
+    <EmbeddedResource Include="Templates\swashbuckleswaggerui.json.handlebars" />
+    <EmbeddedResource Include="Templates\swashbuckleswagger.json.handlebars" />
+    <EmbeddedResource Include="Templates\swashbuckleswaggerui.csharp.handlebars" />
+    <EmbeddedResource Include="Templates\swashbuckleswagger.csharp.handlebars" />
     <EmbeddedResource Include="Templates\timer.json.handlebars" />
     <EmbeddedResource Include="Templates\timer.csharp.handlebars" />
     <EmbeddedResource Include="Templates\swaggerui.json.handlebars" />
@@ -349,14 +359,15 @@
   <ItemGroup>
     <PackageReference Include="AzureFromTheTrenches.Commanding" Version="9.0.1" />
     <PackageReference Include="AzureFromTheTrenches.Commanding.Abstractions" Version="9.0.1" />
+    <PackageReference Include="AzureFunctions.Extensions.Swashbuckle" Version="1.4.1" />
     <PackageReference Include="Handlebars.Net" Version="1.9.5" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="3.0.2" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.CosmosDB" Version="3.0.3" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="3.0.2" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Http" Version="3.0.2" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="3.0.3" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SignalRService" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.3" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.6" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.10.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Microsoft.OpenApi" Version="1.1.2" />

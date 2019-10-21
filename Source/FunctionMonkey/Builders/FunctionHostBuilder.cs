@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using AzureFromTheTrenches.Commanding.Abstractions;
-using FunctionMonkey.Abstractions;
+﻿using AzureFromTheTrenches.Commanding.Abstractions;
 using FunctionMonkey.Abstractions.Builders;
 using FunctionMonkey.Abstractions.Builders.Model;
 using FunctionMonkey.Abstractions.Http;
 using FunctionMonkey.Abstractions.Validation;
 using FunctionMonkey.Model;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
 
 namespace FunctionMonkey.Builders
 {
@@ -20,6 +19,7 @@ namespace FunctionMonkey.Builders
         public IFunctionBuilder FunctionBuilder { get; }
         public IAuthorizationBuilder AuthorizationBuilder { get; } = new AuthorizationBuilder();
         public Type ValidatorType { get; set; }
+        public SwashbuckleConfiguration SwashbuckleConfiguration { get; } = new SwashbuckleConfiguration();
         public OpenApiConfiguration OpenApiConfiguration { get; } = new OpenApiConfiguration();
         public string OutputAuthoredSourceFolder { get; private set; }
         public Action<IServiceProvider> ServiceProviderCreatedAction { get; private set; }
@@ -42,7 +42,7 @@ namespace FunctionMonkey.Builders
             if (_isRuntime)
             {
                 services(ServiceCollection, CommandRegistry);
-            }            
+            }
             return this;
         }
 
@@ -81,6 +81,12 @@ namespace FunctionMonkey.Builders
         public void Functions(Action<IFunctionBuilder> functions)
         {
             functions(FunctionBuilder);
+        }
+
+        public IFunctionHostBuilder Swashbuckle(Action<ISwashbuckleBuilder> swashbuckle)
+        {
+            swashbuckle(new SwashbuckleBuilder(SwashbuckleConfiguration));
+            return this;
         }
 
         public IFunctionHostBuilder OpenApiEndpoint(Action<IOpenApiBuilder> openApi)

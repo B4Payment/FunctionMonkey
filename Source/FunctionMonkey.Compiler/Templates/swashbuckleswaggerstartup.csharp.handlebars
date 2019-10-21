@@ -1,0 +1,26 @@
+using System.Reflection;
+using AzureFunctions.Extensions.Swashbuckle;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using {{Namespace}};
+
+[assembly: WebJobsStartup(typeof(SwashbuckleSwaggerStartup))]
+namespace {{Namespace}}
+{
+    internal class SwashbuckleSwaggerStartup : IWebJobsStartup
+    {
+        public void Configure(IWebJobsBuilder builder)
+        {
+            //Register the extension
+            builder.AddSwashBuckle(Assembly.GetExecutingAssembly());
+
+            builder.Services.AddSingleton(typeof(ISwashBuckleClient),
+                                          typeof(ISwashBuckleClient).Assembly.GetType("AzureFunctions.Extensions.Swashbuckle.SwashBuckleClient"));
+            builder.Services.AddSingleton(typeof(ISwashBuckleClient).Assembly.GetType("AzureFunctions.Extensions.Swashbuckle.SwashbuckleConfig"),
+                                          typeof(ISwashBuckleClient).Assembly.GetType("AzureFunctions.Extensions.Swashbuckle.SwashbuckleConfig"));
+
+//var swashBuckleClient = (ISwashBuckleClient)builder.Services.GetService(typeof(ISwashBuckleClient));
+        }
+    }
+}

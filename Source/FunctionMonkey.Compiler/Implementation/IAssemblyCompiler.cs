@@ -14,6 +14,7 @@ namespace FunctionMonkey.Compiler.Implementation
             IReadOnlyCollection<string> externalAssemblyLocations,
             string outputBinaryFolder,
             string assemblyName,
+            SwashbuckleConfiguration swashbuckleConfiguration,
             OpenApiOutputModel openApiOutputModel,
             FunctionCompiler.TargetEnum target,
             string outputAuthoredSourceFolder = null);

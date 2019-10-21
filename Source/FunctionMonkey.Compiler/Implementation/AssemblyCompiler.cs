@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Versioning;
-using System.Text;
-using System.Threading;
-using FunctionMonkey.Abstractions.Builders.Model;
+﻿using FunctionMonkey.Abstractions.Builders.Model;
 using FunctionMonkey.Abstractions.Extensions;
 using FunctionMonkey.Commanding.Abstractions;
 using FunctionMonkey.Compiler.HandlebarsHelpers;
-using FunctionMonkey.Extensions;
 using FunctionMonkey.Model;
 using FunctionMonkey.SignalR;
 using HandlebarsDotNet;
@@ -28,6 +17,16 @@ using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Versioning;
+using System.Text;
+using AzureFunctions.Extensions.Swashbuckle;
 using ExecutionContext = Microsoft.Azure.WebJobs.ExecutionContext;
 
 namespace FunctionMonkey.Compiler.Implementation
@@ -35,7 +34,7 @@ namespace FunctionMonkey.Compiler.Implementation
     internal class AssemblyCompiler : IAssemblyCompiler
     {
         private readonly ITemplateProvider _templateProvider;
-        
+
         public AssemblyCompiler(ITemplateProvider templateProvider = null)
         {
             _templateProvider = templateProvider ?? new TemplateProvider();
@@ -47,12 +46,14 @@ namespace FunctionMonkey.Compiler.Implementation
             IReadOnlyCollection<string> externalAssemblyLocations,
             string outputBinaryFolder,
             string assemblyName,
+            SwashbuckleConfiguration swashbuckleConfiguration,
             OpenApiOutputModel openApiOutputModel,
             FunctionCompiler.TargetEnum target,
             string outputAuthoredSourceFolder = null)
         {
             HandlebarsHelperRegistration.RegisterHelpers();
             IReadOnlyCollection<SyntaxTree> syntaxTrees = CompileSource(functionDefinitions,
+                swashbuckleConfiguration,
                 openApiOutputModel,
                 functionAppConfigurationType,
                 newAssemblyNamespace,
@@ -62,13 +63,14 @@ namespace FunctionMonkey.Compiler.Implementation
         }
 
         private List<SyntaxTree> CompileSource(IReadOnlyCollection<AbstractFunctionDefinition> functionDefinitions,
+            SwashbuckleConfiguration swashbuckleConfiguration,
             OpenApiOutputModel openApiOutputModel,
             Type functionAppConfigurationType,
             string newAssemblyNamespace,
             string outputAuthoredSourceFolder)
         {
             List<SyntaxTree> syntaxTrees = new List<SyntaxTree>();
-            DirectoryInfo directoryInfo =  outputAuthoredSourceFolder != null ? new DirectoryInfo(outputAuthoredSourceFolder) : null;
+            DirectoryInfo directoryInfo = outputAuthoredSourceFolder != null ? new DirectoryInfo(outputAuthoredSourceFolder) : null;
             if (directoryInfo != null && !directoryInfo.Exists)
             {
                 directoryInfo = null;
@@ -81,10 +83,39 @@ namespace FunctionMonkey.Compiler.Implementation
 
             if (openApiOutputModel != null && openApiOutputModel.IsConfiguredForUserInterface)
             {
-                string templateSource = _templateProvider.GetTemplate("swaggerui","csharp");
+                string templateSource = _templateProvider.GetTemplate("swaggerui", "csharp");
                 AddSyntaxTreeFromHandlebarsTemplate(templateSource, "SwaggerUi", new
                 {
                     Namespace = newAssemblyNamespace
+                }, directoryInfo, syntaxTrees);
+            }
+
+            if (swashbuckleConfiguration.Enabled)
+            {
+                string templateSource = _templateProvider.GetTemplate("swashbuckleswaggerstartup", "csharp");
+                AddSyntaxTreeFromHandlebarsTemplate(templateSource, "SwashbuckleSwaggerStartup", new
+                {
+                    Namespace = newAssemblyNamespace
+                }, directoryInfo, syntaxTrees);
+            }
+
+            if (swashbuckleConfiguration.Enabled)
+            {
+                string templateSource = _templateProvider.GetTemplate("swashbuckleswagger", "csharp");
+                AddSyntaxTreeFromHandlebarsTemplate(templateSource, "SwashbuckleSwagger", new
+                {
+                    Namespace = newAssemblyNamespace,
+                    swashbuckleConfiguration.RoutePrefix
+                }, directoryInfo, syntaxTrees);
+            }
+
+            if (swashbuckleConfiguration.Enabled && swashbuckleConfiguration.UserInterface)
+            {
+                string templateSource = _templateProvider.GetTemplate("swashbuckleswaggerui", "csharp");
+                AddSyntaxTreeFromHandlebarsTemplate(templateSource, "SwashbuckleSwaggerUi", new
+                {
+                    Namespace = newAssemblyNamespace,
+                    swashbuckleConfiguration.RoutePrefix
                 }, directoryInfo, syntaxTrees);
             }
 
@@ -173,7 +204,7 @@ namespace FunctionMonkey.Compiler.Implementation
                     }
                 }
             }
-            
+
             using (Stream stream = new FileStream(Path.Combine(outputBinaryFolder, outputAssemblyName), FileMode.Create))
             {
                 EmitResult result = compilation.Emit(stream, manifestResources: resources);
@@ -243,8 +274,8 @@ namespace FunctionMonkey.Compiler.Implementation
                 {
                     references.Add(MetadataReference.CreateFromStream(systemIo));
                 }
-            }            
-            
+            }
+
             return references;
         }
 
@@ -277,7 +308,8 @@ namespace FunctionMonkey.Compiler.Implementation
                 typeof(DbConnectionStringBuilder).Assembly.Location,
                 typeof(AzureSignalRAuthClient).Assembly.Location,
                 typeof(System.Environment).Assembly.Location,
-                typeof(HttpTriggerAttribute).Assembly.Location
+                typeof(HttpTriggerAttribute).Assembly.Location,
+                typeof(ISwashBuckleClient).Assembly.Location
             };
 
             if (target == FunctionCompiler.TargetEnum.NETCore21)

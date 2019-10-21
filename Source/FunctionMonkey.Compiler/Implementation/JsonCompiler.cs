@@ -18,6 +18,7 @@ namespace FunctionMonkey.Compiler.Implementation
         }
 
         public void Compile(IReadOnlyCollection<AbstractFunctionDefinition> functionDefinitions,
+            SwashbuckleConfiguration swashbuckleConfiguration,
             OpenApiOutputModel openApiOutputModel,
             string outputBinaryFolder,
             string outputNamespaceName)
@@ -67,6 +68,34 @@ namespace FunctionMonkey.Compiler.Implementation
                 });
 
                 WriteFunctionTemplate(outputBinaryFolder, "OpenApiProvider", json);
+            }
+
+            if (swashbuckleConfiguration.Enabled)
+            {
+                string templateSource = _templateProvider.GetTemplate("swashbuckleswagger", "json");
+                Func<object, string> template = Handlebars.Compile(templateSource);
+                string json = template(new
+                {
+                    AssemblyName = $"{outputNamespaceName}.dll",
+                    Namespace = outputNamespaceName,
+                    swashbuckleConfiguration.RoutePrefix
+                });
+
+                WriteFunctionTemplate(outputBinaryFolder, "SwashbuckleSwagger", json);
+            }
+
+            if (swashbuckleConfiguration.Enabled && swashbuckleConfiguration.UserInterface)
+            {
+                string templateSource = _templateProvider.GetTemplate("swashbuckleswaggerui", "json");
+                Func<object, string> template = Handlebars.Compile(templateSource);
+                string json = template(new
+                {
+                    AssemblyName = $"{outputNamespaceName}.dll",
+                    Namespace = outputNamespaceName,
+                    swashbuckleConfiguration.RoutePrefix
+                });
+
+                WriteFunctionTemplate(outputBinaryFolder, "SwashbuckleSwaggerUi", json);
             }
         }
 

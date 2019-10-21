@@ -1,0 +1,19 @@
+using System.Net.Http;
+using System.Threading.Tasks;
+using AzureFunctions.Extensions.Swashbuckle;
+using AzureFunctions.Extensions.Swashbuckle.Attribute;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+
+namespace {{Namespace}}
+{
+    public static class SwashbuckleSwaggerUi
+    {
+        [SwaggerIgnore]
+        [FunctionName("SwashbuckleSwaggerUi")]
+        public static Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{{RoutePrefix}}/ui")]HttpRequestMessage req)//, ISwashBuckleClient swashBuckleClient)
+        {
+            return null;//Task.FromResult(swashBuckleClient.CreateSwaggerUIResponse(req, "{{RoutePrefix}}/json"));
+        }
+    }
+}
